@@ -9,50 +9,7 @@ import sys
 
 parent_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(parent_dir))
-from model.utils import _process_file
-
-
-def download(repo_url, destination, folder_path="models/AFMultimer"):
-    """
-    Download a specific folder using partial clone with tree filter.
-    """
-    try:
-        # Create destination directory
-        os.makedirs(destination, exist_ok=True)
-
-        # Use partial clone with tree filter
-        subprocess.run(
-            [
-                "git",
-                "clone",
-                "--filter=tree:0",
-                "--no-checkout",
-                repo_url,
-                destination,
-            ],
-            check=True,
-        )
-
-        # Configure sparse-checkout
-        subprocess.run(
-            ["git", "config", "core.sparseCheckout", "true"],
-            cwd=destination,
-            check=True,
-        )
-
-        # Set sparse-checkout path
-        sparse_checkout_file = os.path.join(
-            destination, ".git", "info", "sparse-checkout"
-        )
-        with open(sparse_checkout_file, "w") as f:
-            f.write(f"{folder_path}/*\n")
-
-        # Checkout only the specified folder
-        subprocess.run(["git", "checkout"], cwd=destination, check=True)
-
-    except subprocess.CalledProcessError as e:
-        print(f"Partial clone failed: {e}")
-        raise
+from utils import _process_file_afm, _download
 
 
 def name(input_path, output_path):
@@ -80,10 +37,10 @@ def name(input_path, output_path):
                 continue
 
             # Process the file
-            _process_file(
+            _process_file_afm(
                 file_path, filename, output_path, pattern="_relaxed_", format="pdb"
             )
-            _process_file(
+            _process_file_afm(
                 file_path, filename, output_path, pattern="_scores_", format="json"
             )
 
@@ -164,7 +121,7 @@ def build_afm_argparser():
     )
 
     parser.add_argument(
-        "--output",
+        "--output_dir",
         required=True,
         type=str,
         help="Directory to save the processed dataset.",
@@ -172,16 +129,11 @@ def build_afm_argparser():
     return parser
 
 
-def main():
-    parser = build_afm_argparser()
-    args = parser.parse_args()
-
-    repo_url = args.path
-    output_dir = args.output
+def main_afm(path, output_dir):
     tmp = os.getcwd() + "/tmp"
     os.makedirs(tmp, exist_ok=True)
 
-    download(repo_url, tmp)
+    _download(path, tmp)
     input_dir = os.path.join(tmp, "models/AFMultimer")
     name(input_dir, output_dir)
     json_files = [f for f in os.listdir(output_dir) if f.endswith(".json")]
@@ -193,7 +145,6 @@ def main():
         json_path = os.path.join(output_dir, json_file)
         json_name = str(Path(json_file).stem)
 
-        # Fixed: Join the id parts and rename variable
         protein_id = "_".join(json_name.split("_")[:-1])
         rank = json_name.split("_")[-1]
 
@@ -226,18 +177,12 @@ def main():
     dfs = pd.merge(dfs, chain_df, on=["id", "rank"], how="left")
 
     try:
-        dfs = dfs[
-            [
-                "id",
-                "rank",
-                "chains",
-                "mean_plddt",
-                "max_pae",
-                "ptm",
-                "iptm",
-                "composite_ptm",
-            ]
+        main_cols = [
+            "id",
+            "rank",
+            "chains",
         ]
+        dfs = dfs[main_cols + [c for c in dfs.columns if c not in main_cols]]
         dfs.sort_values(by=["id", "rank"], inplace=True)
     except KeyError as e:
         print(f"Missing expected columns: {e}")
@@ -251,4 +196,9 @@ if __name__ == "__main__":
     # repo_url = "https://github.com/pszgaspar/short_peptide_modeling_benchmark.git"
     # output_dir = "./tmp"
     # download(repo_url, output_dir)
-    main()
+    parser = build_afm_argparser()
+    args = parser.parse_args()
+
+    repo_url = args.path
+    output_dir = args.output_dir
+    main_afm(repo_url, output_dir)
