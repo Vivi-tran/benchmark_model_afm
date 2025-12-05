@@ -27,7 +27,12 @@ def build_argparser():
         type=str,
         help="Directory to save the processed dataset.",
     )
-
+    parser.add_argument(
+        '--name',
+        choices=["AFMultimer", "Chai-1", "HelixFold3"],
+        default='AFm',
+        help='Name for omnibenchmark. Default: AFm'
+    )
     return parser
 
 
