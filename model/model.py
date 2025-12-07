@@ -71,7 +71,7 @@ def main():
     shutil.copy2(args.input, output_native / Path(args.input).name)
 
     # Create tar archive
-    archive_name = output_native.parent / f"{output_native.name}.tar"
+    archive_name = output_native.parent / f"{args.name}.{output_native.name}.tar"
     with tarfile.open(archive_name, "w") as tar:
         tar.add(output_native, arcname=output_native.name)
     if archive_name.exists():
