@@ -38,7 +38,7 @@ def build_argparser():
     parser.add_argument(
         "--input",
         type=str,
-        required=True,
+        default="./native_metadata.csv",
         help="Path to input csv file with columns <id>, <pdb_id>.",
     )
     return parser
