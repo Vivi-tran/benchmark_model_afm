@@ -72,11 +72,11 @@ def json_extract(json_path):
         composite_ptm = 0.8 * iptm + 0.2 * ptm
 
         return {
-            "mean_plddt": round(mean_plddt, 2),
-            "max_pae": round(max_pae, 2),
-            "ptm": round(ptm, 2),
-            "iptm": round(iptm, 2),
-            "composite_ptm": round(composite_ptm, 2),
+            "mean_plddt": round(mean_plddt, 3),
+            "max_pae": round(max_pae, 3),
+            "ptm": round(ptm, 3),
+            "iptm": round(iptm, 3),
+            "composite_ptm": round(composite_ptm, 3),
         }
 
     except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
@@ -114,7 +114,7 @@ def chain_extract(pdb_path):
 
 
 def build_afm_argparser():
-    parser = argparse.ArgumentParser(description="AFM Benchmark Model")
+    parser = argparse.ArgumentParser(description="AFMultimer Benchmark Model")
 
     parser.add_argument(
         "--path", required=True, type=str, help="Path to download the dataset."
@@ -188,7 +188,7 @@ def main_afm(path, output_dir):
         print(f"Missing expected columns: {e}")
         print(f"Available columns: {list(dfs.columns)}")
 
-    dfs.to_csv(os.path.join(output_dir, "AFm_metadata.csv"), index=False)
+    dfs.to_csv(os.path.join(output_dir, "AFMultimer_metadata.csv"), index=False)
     shutil.rmtree(tmp)
 
 

@@ -61,11 +61,11 @@ def json_extract(json_path):
         composite_ptm = data.get("ranking_confidence", 0.0)
 
         return {
-            "mean_plddt": round(mean_plddt, 2),
-            "global_pae": round(global_pae, 2),
-            "ptm": round(ptm, 2),
-            "iptm": round(iptm, 2),
-            "composite_ptm": round(composite_ptm, 2),
+            "mean_plddt": round(mean_plddt, 3),
+            "global_pae": round(global_pae, 3),
+            "ptm": round(ptm, 3),
+            "iptm": round(iptm, 3),
+            "composite_ptm": round(composite_ptm, 3),
         }
 
     except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
