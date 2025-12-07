@@ -59,7 +59,7 @@ def main():
     elif model == "HelixFold3":
         main_helixfold3(repo_url, str(output_model))
     # Create tar archive
-    archive_name = output_model.parent / f"{output_model.name}.tar"
+    archive_name = output_model.parent / f"{args.name}.tar"
     with tarfile.open(archive_name, "w") as tar:
         tar.add(output_model, arcname=output_model.name)
     if archive_name.exists():
