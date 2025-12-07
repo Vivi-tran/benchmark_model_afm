@@ -18,7 +18,7 @@ def _extract(filename, separator, pattern=r"_rank_(\d+)_"):
     # Extract rank using regex to find "_rank_XXX_" pattern
     rank_match = re.search(pattern, filename)
     if rank_match:
-        return id_part, rank_match.group(1)
+        return id_part, int(rank_match.group(1))
 
     return None, None
 
