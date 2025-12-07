@@ -9,6 +9,7 @@ sys.path.append(str(parent_dir))
 from afm import main_afm
 from chai1 import main_chai1
 from helixfold3 import main_helixfold3
+from native.download import retrieve_natives
 
 def build_argparser():
     parser = argparse.ArgumentParser(description="AFM Benchmark Model")
@@ -33,50 +34,48 @@ def build_argparser():
         default='AFm',
         help='Name for omnibenchmark. Default: AFm'
     )
+
+    parser.add_argument(
+        "--input",
+        type=str,
+        required=True,
+        help="Path to input csv file with columns <id>, <pdb_id>.",
+    )
     return parser
-
-
-# def main():
-#     parser = build_argparser()
-#     args = parser.parse_args()
-
-#     repo_url = "https://github.com/pszgaspar/short_peptide_modeling_benchmark.git"
-#     model = args.model
-#     output_dir = Path(args.output_dir) / model
-#     if model == "AFMultimer":
-#         main_afm(repo_url, output_dir)
-
-#     elif model == "Chai-1":
-#         main_chai1(repo_url, output_dir)
-#     elif model == "HelixFold3":
-#         main_helixfold3(repo_url, output_dir)
-#     # Create tar.gz archive
-#     archive_name = output_dir.parent / f"{output_dir.name}.tar.gz"
-#     with tarfile.open(archive_name, "w:gz") as tar:
-#         tar.add(output_dir, arcname=output_dir.name)
-#     if archive_name.exists():
-#         shutil.rmtree(output_dir) 
 
 def main():
     parser = build_argparser()
     args = parser.parse_args()
 
+    # Download and process model results
     repo_url = "https://github.com/pszgaspar/short_peptide_modeling_benchmark.git"
     model = args.model
-    output_dir = Path(args.output_dir) / model
+    output_model = Path(args.output_dir) / model
     if model == "AFMultimer":
-        main_afm(repo_url, str(output_dir))
+        main_afm(repo_url, str(output_model))
 
     elif model == "Chai-1":
-        main_chai1(repo_url, str(output_dir))
+        main_chai1(repo_url, str(output_model))
     elif model == "HelixFold3":
-        main_helixfold3(repo_url, str(output_dir))
+        main_helixfold3(repo_url, str(output_model))
     # Create tar archive
-    archive_name = output_dir.parent / f"{output_dir.name}.tar"
+    archive_name = output_model.parent / f"{output_model.name}.tar"
     with tarfile.open(archive_name, "w") as tar:
-        tar.add(output_dir, arcname=output_dir.name)
+        tar.add(output_model, arcname=output_model.name)
     if archive_name.exists():
-        shutil.rmtree(output_dir)  
+        shutil.rmtree(output_model)
+
+    # Download native structures
+    output_native = Path(args.output_dir) / "natives"
+    retrieve_natives(args.input, output_native)
+    shutil.copy2(args.input, output_native / Path(args.input).name)
+
+    # Create tar archive
+    archive_name = output_native.parent / f"{output_native.name}.tar"
+    with tarfile.open(archive_name, "w") as tar:
+        tar.add(output_native, arcname=output_native.name)
+    if archive_name.exists():
+        shutil.rmtree(output_native)
 
 
 if __name__ == "__main__":
