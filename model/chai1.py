@@ -60,10 +60,10 @@ def json_extract(json_path):
             data = json.load(f)
 
         # Extract pLDDT scores
-        plddt_list = data.get("plddt", [])
-        mean_plddt = sum(plddt_list) / len(plddt_list) if plddt_list else 0.0
+        # plddt_list = data.get("plddt", [])
+        # mean_plddt = sum(plddt_list) / len(plddt_list) if plddt_list else 0.0
 
-        max_pae = data.get("max_pae", 0.0)
+        # max_pae = data.get("max_pae", 0.0)
         # Extract confidence metrics
         ptm = data.get("ptm", 0.0)
         iptm = data.get("iptm", 0.0)
@@ -72,8 +72,6 @@ def json_extract(json_path):
         composite_ptm = data.get("aggregate_score", 0.0)
 
         return {
-            "mean_plddt": round(mean_plddt, 3),
-            "max_pae": round(max_pae, 3),
             "ptm": round(ptm, 3),
             "iptm": round(iptm, 3),
             "composite_ptm": round(composite_ptm, 3),
@@ -82,8 +80,6 @@ def json_extract(json_path):
     except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
         print(f"Error processing {json_path}: {e}")
         return {
-            "mean_plddt": 0.00,
-            "max_pae": 0.00,
             "ptm": 0.00,
             "iptm": 0.00,
             "composite_ptm": 0.00,

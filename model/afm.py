@@ -72,21 +72,21 @@ def json_extract(json_path):
         composite_ptm = 0.8 * iptm + 0.2 * ptm
 
         return {
-            "mean_plddt": round(mean_plddt, 3),
-            "max_pae": round(max_pae, 3),
+            "plddt": round(mean_plddt, 3),
             "ptm": round(ptm, 3),
             "iptm": round(iptm, 3),
             "composite_ptm": round(composite_ptm, 3),
+            "max_pae": round(max_pae, 3),
         }
 
     except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
         print(f"Error processing {json_path}: {e}")
         return {
-            "mean_plddt": 0.00,
-            "max_pae": 0.00,
+            "plddt": 0.00,
             "ptm": 0.00,
             "iptm": 0.00,
             "composite_ptm": 0.00,
+            "max_pae": 0.00,
         }
 
 
