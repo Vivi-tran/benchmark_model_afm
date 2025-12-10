@@ -122,13 +122,16 @@ def build_helixfold3_argparser():
     return parser
 
 
-def main_helixfold3(path, output_dir):
+def main_helixfold3(path, output_dir, url):
     tmp = os.getcwd() + "/tmp"
     os.makedirs(tmp, exist_ok=True)
     os.makedirs(output_dir, exist_ok=True)
-
-    _download(path, tmp, folder_path="models/HelixFold3")
-    input_dir = os.path.join(tmp, "models/HelixFold3")
+    if url:
+        _download(path, tmp, folder_path="models/HelixFold3")
+        input_dir = os.path.join(tmp, "models/HelixFold3")
+    else:
+        input_dir = os.path.join(path, "HelixFold3")
+    # input_dir = os.path.join(tmp, "models/HelixFold3")
     name(input_dir, output_dir)
     json_files = [f for f in os.listdir(output_dir) if f.endswith(".json")]
     cif_files = [f for f in os.listdir(output_dir) if f.endswith(".cif")]

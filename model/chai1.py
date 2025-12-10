@@ -182,13 +182,16 @@ def build_chai1_argparser():
     return parser
 
 
-def main_chai1(path, output_dir):
+def main_chai1(path, output_dir, url):
     tmp = os.getcwd() + "/tmp"
     os.makedirs(tmp, exist_ok=True)
     os.makedirs(output_dir, exist_ok=True)
-
-    _download(path, tmp, folder_path="models/Chai-1")
-    input_dir = os.path.join(tmp, "models/Chai-1")
+    if url:
+        _download(path, tmp, folder_path="models/Chai-1")
+        input_dir = os.path.join(tmp, "models/Chai-1")
+    else:
+        input_dir = os.path.join(path, "Chai-1")
+    # input_dir = os.path.join(tmp, "models/Chai-1")
     name(input_dir, output_dir)
     json_files = [f for f in os.listdir(output_dir) if f.endswith(".json")]
     cif_files = [f for f in os.listdir(output_dir) if f.endswith(".cif")]

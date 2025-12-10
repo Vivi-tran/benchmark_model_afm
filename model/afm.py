@@ -129,12 +129,16 @@ def build_afm_argparser():
     return parser
 
 
-def main_afm(path, output_dir):
+def main_afm(path, output_dir, url):
     tmp = os.getcwd() + "/tmp"
     os.makedirs(tmp, exist_ok=True)
-
-    _download(path, tmp)
-    input_dir = os.path.join(tmp, "models/AFMultimer")
+    os.makedirs(output_dir, exist_ok=True)
+    if url:
+        _download(path, tmp)
+        input_dir = os.path.join(tmp, "models/AFMultimer")
+    else:
+        input_dir = os.path.join(path, "AFMultimer")
+    # input_dir = os.path.join(tmp, "models/AFMultimer")
     name(input_dir, output_dir)
     json_files = [f for f in os.listdir(output_dir) if f.endswith(".json")]
     pdb_files = [f for f in os.listdir(output_dir) if f.endswith(".pdb")]

@@ -14,6 +14,11 @@ from native.download import retrieve_natives
 def build_argparser():
     parser = argparse.ArgumentParser(description="AFM Benchmark Model")
 
+    parser.add_argument(
+        "--input_path", 
+        default="https://github.com/pszgaspar/short_peptide_modeling_benchmark.git",
+        type=str, 
+        help="GitHub repository URL to download the dataset or local path.")
 
     parser.add_argument(
         "--model",
@@ -47,17 +52,31 @@ def main():
     parser = build_argparser()
     args = parser.parse_args()
 
-    # Download and process model results
-    repo_url = "https://github.com/pszgaspar/short_peptide_modeling_benchmark.git"
+    input_path = args.input_path
     model = args.model
     output_model = Path(args.output_dir) / model
-    if model == "AFMultimer":
-        main_afm(repo_url, str(output_model))
 
-    elif model == "Chai-1":
-        main_chai1(repo_url, str(output_model))
-    elif model == "HelixFold3":
-        main_helixfold3(repo_url, str(output_model))
+    if isinstance(input_path, str) and input_path.startswith("https://github.com/"):
+        repo_url = input_path
+        url = True
+        # Download and process model results from repo
+        if model == "AFMultimer":
+            main_afm(repo_url, str(output_model), url=url)
+        elif model == "Chai-1":
+            main_chai1(repo_url, str(output_model), url=url)
+        elif model == "HelixFold3":
+            main_helixfold3(repo_url, str(output_model), url=url)
+    elif input_path and Path(input_path).exists():
+        # Process local path directly
+        url = False
+        if model == "AFMultimer":
+            main_afm(input_path, str(output_model), url=url)
+        elif model == "Chai-1":
+            main_chai1(input_path, str(output_model), url=url)
+        elif model == "HelixFold3":
+            main_helixfold3(input_path, str(output_model), url=url)
+    else:
+        raise ValueError("input_path must be a valid GitHub repo URL or an existing local path.")
     # Create tar archive
     archive_name = output_model.parent / f"{args.name}.tar"
     with tarfile.open(archive_name, "w") as tar:
