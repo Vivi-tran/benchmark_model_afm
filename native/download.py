@@ -77,7 +77,7 @@ def retrieve_natives(input: str, outdir: str | Path = ".") -> Path:
         download(pdb_id, outdir)
         shutil.move(
             outdir / f"{pdb_id}.pdb",
-            outdir / f"{id}.pdb",
+            outdir / f"{id}_{pdb_id.upper()}.pdb",
         )
     return outdir
 
