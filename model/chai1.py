@@ -85,6 +85,63 @@ def json_extract(json_path):
             "composite_ptm": 0.00,
         }
 
+def plddt_cif_extract(cif_path):
+    """
+    Extract mean pLDDT (B-factor) from CIF file without BioPython.
+
+    Args:
+        cif_path (str): Path to the CIF file
+
+    Returns:
+        float: Mean pLDDT value
+    """
+    b_factors = []
+    try:
+        with open(cif_path, "r") as f:
+            lines = f.readlines()
+
+        # Find atom_site loop
+        in_loop = False
+        columns = []
+        b_index = None
+        for i, line in enumerate(lines):
+            if line.strip().startswith("loop_"):
+                # Check if next lines are atom_site columns
+                in_loop = True
+                columns = []
+                b_index = None
+                continue
+            if in_loop and line.strip().startswith("_atom_site."):
+                columns.append(line.strip())
+                if line.strip() in ["_atom_site.B_iso_or_equiv", "_atom_site.pLDDT"]:
+                    b_index = len(columns) - 1
+                continue
+            # End of columns, start of data
+            if in_loop and columns and not line.strip().startswith("_atom_site."):
+                if b_index is None:
+                    # No B-factor column found
+                    break
+                # Parse data rows
+                while i < len(lines):
+                    row = lines[i].strip()
+                    if not row or row.startswith("#") or row.startswith("loop_") or row.startswith("_"):
+                        break
+                    fields = row.split()
+                    if len(fields) > b_index:
+                        try:
+                            b_factors.append(float(fields[b_index]))
+                        except ValueError:
+                            pass
+                    i += 1
+                break
+    except Exception as e:
+        print(f"Error reading CIF file for pLDDT: {e}")
+        return 0.0
+
+    if b_factors:
+        return sum(b_factors) / len(b_factors)
+    else:
+        return 0.0
 
 def chain_extract(cif_path):
     """
@@ -154,6 +211,8 @@ def main_chai1(path, output_dir):
     chain_results = []
     for cif_file in cif_files:
         cif_path = os.path.join(output_dir, cif_file)
+        plddt = plddt_cif_extract(cif_path)
+        plddt = round(plddt, 3)
         cif_name = str(Path(cif_file).stem)
 
         protein_id = "_".join(cif_name.split("_")[:-1])
@@ -165,6 +224,7 @@ def main_chai1(path, output_dir):
                 "id": protein_id,
                 "rank": rank,
                 "chains": "".join(chains)[:2],
+                "plddt": plddt,
             }
         )
 
@@ -194,3 +254,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     main_chai1(args.path, args.output_dir)
     # python model/chai1.py --path https://github.com/pszgaspar/short_peptide_modeling_benchmark.git --output_dir data/processed/Chai-1
+    # cif_path = "data/Chai-1/Beta_endorphin-mu_opioid_1.cif"
+    # plddt_score = plddt_cif_extract(cif_path)
+    # print(f"Mean pLDDT from CIF: {plddt_score}")
